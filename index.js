@@ -8,22 +8,19 @@ app.use(bodyParser.json());
 
 const slack = new WebClient(process.env.SLACK_BOT_TOKEN);
 
-// ✅ Fixed: Use just the Sheet ID (not the full URL)
+// ✅ Only the Sheet ID here, not the full URL
 const doc = new GoogleSpreadsheet('1GVq7TqDoR7aAE2XhxhIUyBiTw3CuAhAxeigDfCJ51f4'); 
-
-const creds = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT); // Stored in Render env
+const creds = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT);
 
 const AUTHORIZED_USERS = ["U07AZN6422G", "U048T67N45S", "U062F7423D4", "UH2J709L7"];
 
 app.post('/slack/events', async (req, res) => {
   const { type, event } = req.body;
 
-  // Step 1: Slack verification challenge
   if (type === 'url_verification') {
     return res.status(200).send(req.body.challenge);
   }
 
-  // Step 2: Handle reactions
   if (event && event.type === 'reaction_added') {
     const { reaction, user, item } = event;
 
@@ -35,7 +32,7 @@ app.post('/slack/events', async (req, res) => {
       const sheet = doc.sheetsByIndex[0];
       const rows = await sheet.getRows();
 
-      const targetRow = rows.find(row => row._rawData[16] === item.ts); // Column Q = timestamp
+      const targetRow = rows.find(row => row._rawData[16] === item.ts); // Column Q
 
       if (!targetRow) return res.sendStatus(200);
 
@@ -61,16 +58,15 @@ app.post('/slack/events', async (req, res) => {
           : "❌ Your request has been denied. Please continue your current schedule.";
       }
 
-      // Reply in Slack thread
       await slack.chat.postMessage({
         channel: item.channel,
         thread_ts: item.ts,
         text: response,
       });
 
-      // Update status in sheet (Column N = 13)
-      targetRow._rawData[13] = approved ? "Approved" : "Denied";
+      targetRow._rawData[13] = approved ? "Approved" : "Denied"; // Column N
       await targetRow.save();
+
     } catch (error) {
       console.error("Error processing reaction:", error);
     }
@@ -81,7 +77,6 @@ app.post('/slack/events', async (req, res) => {
   res.sendStatus(200);
 });
 
-// Optional: test the server is up
 app.get('/', (req, res) => {
   res.send('Slack bot is running ✅');
 });
