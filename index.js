@@ -10,7 +10,7 @@ app.post('/slack/events', async (req, res) => {
   const { type, event } = req.body;
 
   if (type === 'url_verification') {
-    return res.send({ challenge: req.body.challenge });
+    return res.status(200).send(req.body.challenge);
   }
 
   if (event && event.type === 'reaction_added') {
@@ -73,3 +73,4 @@ function getDeniedMessage(type) {
 }
 
 app.listen(process.env.PORT || 3000, () => console.log("Server is running"));
+Fix Slack URL verification
