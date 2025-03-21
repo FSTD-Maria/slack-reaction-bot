@@ -10,7 +10,7 @@ const slack = new WebClient(process.env.SLACK_BOT_TOKEN);
 
 // ✅ Only the Sheet ID here, not the full URL
 const doc = new GoogleSpreadsheet('1GVq7TqDoR7aAE2XhxhIUyBiTw3CuAhAxeigDfCJ51f4'); 
-const creds = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT);
+const creds = require('/etc/secrets/service_account.json');
 
 const AUTHORIZED_USERS = ["U07AZN6422G", "U048T67N45S", "U062F7423D4", "UH2J709L7"];
 
